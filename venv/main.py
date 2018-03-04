@@ -32,12 +32,10 @@ def initializ_alpha(theta, poly_power, init):
     return theta
 
 
-def compute_error_for_line_given_points(b, m, points):
+def how_much_i_suck(theta, points):
     totalError = 0
-    for i in range(0, len(points)):
-        x = points[i][0]
-        y = points[i][1]
-        totalError += (y - (m * x + b)) ** 2
+    for point in points:
+        totalError += (point[1] - h(theta, point[0])) ** 2
     return totalError / float(len(points))
 
 
@@ -50,7 +48,7 @@ def h(theta, x):
 
 def theta_loop(theta, points, alpha):
     for i in range(len(theta)):
-        sum = 0;
+        sum = 0
         for point in points:
             sum += (h(theta, point[0]) - point[1]) * point[0] ** i
         theta[i] = theta[i] - (1/len(points)*alpha*sum)
@@ -76,31 +74,65 @@ def theta_loop_v2(theta, points, alpha):
     return theta
 
 
+def formulize(theta):
+    for i in range(len(theta)-1):
+        print(theta[i], "* x ^", i, "+", end = " ")
+    print(theta[len(theta)-1], "* x ^", len(theta)-1)
+
+
+def formulize_v2(theta):
+    line = ""
+    for i in range(len(theta)-1):
+        line += str(theta[i]) + " * x ^ " + str(i) + " + "
+    line += str(theta[len(theta)-1]) + " * x ^ " + str(len(theta)-1)
+    return line
+
+
 def main():
-    s1 = "synthetic-1.csv"
-    s2 = "synthetic-2.csv"
-    s3 = "synthetic-3.csv"
-    points = genfromtxt(s1, delimiter=',')
-    poly_order = 9
-    learning_rate = .01
-    num_iterations = 5000
-    theta = []
-    theta = initializ_theta(theta, poly_order, 0)
-    alpha = []
-    alpha = initializ_alpha(alpha, poly_order, -9)
+    files = ["synthetic-1.csv", "synthetic-2.csv", "synthetic-3.csv"]
+    orders = [1,2,4,9]
 
-    pprint(theta)
+    # points = genfromtxt(s2, delimiter=',')
+    # poly_order = 3
+    # learning_rate = .01
+    # num_iterations = 1000
+    # theta = []
+    # theta = initializ_theta(theta, poly_order, 0)
+    # alpha = []
+    # alpha = initializ_alpha(alpha, poly_order, -3)
+    # for i in tqdm(range(num_iterations)):
+    #     theta = theta_loop_v2(theta, points, alpha)
+    # print(theta)
+    # print(alpha)
+    # print("Error:", how_much_i_suck(theta, points))
+    # print(formulize_v2(theta))
 
-    for i in tqdm(range(num_iterations)):
-        # theta = theta_loop(theta, points, learning_rate)
-        theta = theta_loop_v2(theta, points, alpha)
-        # print(theta)
+    the_scroll_of_truth = []
+    for j in range(6):
+        for file in files:
+            points = genfromtxt(file, delimiter=',')
+            for order in orders:
+                init_alpha = order * -1
+                if order == 9:
+                    init_alpha = -12
+                num_iterations = 10 ** j
+                theta = []
+                theta = initializ_theta(theta, order, 0)
+                alpha = []
+                alpha = initializ_alpha(alpha, order, init_alpha)
+                for i in range(num_iterations):
+                    theta = theta_loop_v2(theta, points, alpha)
+                print("Iterations:", num_iterations, "\tFile:", file, "\tOrder:", order, "\tError:", how_much_i_suck(theta, points), "\tFormula:", formulize_v2(theta))
+                temp = []
+                temp.append(file)
+                temp.append(order)
+                temp.append(how_much_i_suck(theta, points))
+                temp.append(formulize_v2(theta))
+                the_scroll_of_truth.append(temp)
+            print()
+        print()
+        print()
 
-    print(theta)
-
-
-    #print(gradient_descent_runner(points, initial_b, initial_m, learning_rate, num_iterations))
-    #pprint(gradient_descent_runner_2(points, theta, learning_rate, num_iterations))
 
 
 if __name__ == '__main__': main()
